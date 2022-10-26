@@ -1,38 +1,46 @@
 <template>
     <div class="add-project">
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleEdit">
             <label for="">Title</label>
             <input type="text" required v-model="this.title">
             <label for="">Details</label>
-            <textarea v-model="this.description"></textarea>
-            <button>Add project</button>
+            <textarea v-model="this.details"></textarea>
+            <button>edit project</button>
         </form>
     </div>
 </template>
 
 <script>
     export default {
+        props: ['id'],
         data() {
             return {
                 title: '',
-                description: ''
+                details: '',
+                url: 'http://localhost:3000/projects/' + this.id
             }
+        }, 
+        mounted() {
+            fetch(this.url)
+                .then( res => res.json())
+                .then( data => {
+                    this.title = data.title
+                    this.details = data.description
+                })
+                .catch( err => console.log(err.message))
         },
         methods: {
-            handleSubmit() {
-                let project = {
-                    title: this.title,
-                    description: this.description,
-                    complite: false
-                }
-
-                fetch('http://localhost:3000/projects', {
-                    method: 'POST',
+            handleEdit(){
+                fetch(this.url, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(project)
+                    body: JSON.stringify({
+                        title: this.title,
+                        description: this.details
+                    })
                 }).then(() => {
-                    this.$router.push({ name: 'home'})
-                }).catch( err => { console.log(err.message) })
+                    this.$router.push({name: 'home'})
+                }).catch(err => console.log(err))
             }
         }
     }

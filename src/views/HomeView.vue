@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-   
+   <FilterProject @current="handleCurrent($event)" :current="this.current"/>
     <div v-if="projects" class="projects">
-      <div v-for="project in projects" :key="project.id" >
+      <div v-for="project in filteredProjects" :key="project.id" >
         <SingleProject :project="project" @delete="handleDelete" @complete="handleComplite"/>
       </div>
     </div>
@@ -13,15 +13,18 @@
 
 <script>
 import SingleProject from '../components/SingleProject.vue'
+import FilterProject from '../components/FilterProject.vue'
 
 export default {
   name: 'Home',
   components: {
-   SingleProject
+   SingleProject,
+   FilterProject
   },
   data() {
     return {
-      projects: []
+      projects: [],
+      current: 'all'
     }
   },
   methods: {
@@ -35,6 +38,20 @@ export default {
         return project.id === id
       })
       p.complete = !p.complete
+    },
+    handleCurrent(by) {
+      this.current = by
+    },
+  },
+  computed: {
+    filteredProjects(){
+      if (this.current === 'complete'){
+        return this.projects.filter(project => project.complete)
+      }
+      if (this.current === 'ongoing'){
+        return this.projects.filter(project => !project.complete)
+      }
+      return this.projects
     }
   },
   mounted() {
